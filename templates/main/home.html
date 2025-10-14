@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Job Portal{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 100px 0;">
+  <div class="container">
+    <h1 class="display-4 fw-bold">Find Your Dream Job Today</h1>
+    <p class="lead mb-4">Connecting job seekers and employers in one simple platform</p>
+    <div>
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-light btn-lg mx-2">
+          <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+        </a>
+        <a href="{% url 'logout' %}" class="btn btn-light btn-lg mx-2">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg mx-2">
+          <i class="fas fa-sign-in-alt me-2"></i>Login
+        </a>
+        <a href="{% url 'register' %}" class="btn btn-light btn-lg mx-2">
+          <i class="fas fa-user-plus me-2"></i>Register
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Quick Access Cards -->
+<div class="container my-5">
+  <div class="row text-center">
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <i class="fas fa-user-graduate fa-3x text-primary mb-3"></i>
+          <h5>Job Seekers</h5>
+          <p>Find jobs that match your skills and career goals.</p>
+          {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+          {% else %}
+            <a href="{% url 'register_job_seeker' %}" class="btn btn-primary">Start as Job Seeker</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <i class="fas fa-building fa-3x text-success mb-3"></i>
+          <h5>Employers</h5>
+          <p>Post jobs, manage applications, and hire top talent.</p>
+          {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="btn btn-success">Go to Dashboard</a>
+          {% else %}
+            <a href="{% url 'register_employer' %}" class="btn btn-success">Start as Employer</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <i class="fas fa-user-shield fa-3x text-warning mb-3"></i>
+          <h5>Admin</h5>
+          <p>Manage users, employers, and job postings securely.</p>
+          <a href="/admin/" class="btn btn-warning text-white">Admin Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Section -->
+<div class="container my-5">
+  <div class="row text-center">
+    <div class="col-md-4">
+      <div class="stat-card" style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h2 class="text-primary">1,200+</h2>
+        <p>Active Jobs</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card" style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h2 class="text-success">350+</h2>
+        <p>Companies Registered</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card" style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h2 class="text-warning">2,500+</h2>
+        <p>Candidates Joined</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Why Choose Us Section -->
+<section class="py-5 bg-light">
+  <div class="container text-center">
+    <h2 class="fw-bold mb-4">Why Choose Job Portal?</h2>
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <i class="fas fa-search fa-2x text-primary mb-3"></i>
+        <h5>Smart Job Search</h5>
+        <p>Find jobs by title, skills, or location using our powerful search engine.</p>
+      </div>
+      <div class="col-md-4 mb-4">
+        <i class="fas fa-briefcase fa-2x text-success mb-3"></i>
+        <h5>For Employers</h5>
+        <p>Post openings, filter candidates, and manage hiring with ease.</p>
+      </div>
+      <div class="col-md-4 mb-4">
+        <i class="fas fa-users fa-2x text-warning mb-3"></i>
+        <h5>For Job Seekers</h5>
+        <p>Track your applications, get shortlisted, and manage your profile.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="text-center py-5" style="background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); color: white;">
+  <div class="container">
+    <h2 class="fw-bold mb-3">Ready to find your next opportunity?</h2>
+    <p class="lead mb-4">Join Job Portal and connect with top companies today.</p>
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg mx-2">Go to Dashboard</a>
+    {% else %}
+      <a href="{% url 'register_job_seeker' %}" class="btn btn-light btn-lg mx-2">Start as Job Seeker</a>
+      <a href="{% url 'register_employer' %}" class="btn btn-outline-light btn-lg mx-2">Start as Employer</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
