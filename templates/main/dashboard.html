@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Job Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h2><i class="fas fa-tachometer-alt me-2"></i>Welcome to Your Dashboard, {{ user.username }}!</h2>
+                <p class="lead">You have successfully logged in to Job Portal.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-user fa-3x text-primary mb-3"></i>
+                                <h5>Profile</h5>
+                                <p>Manage your account settings</p>
+                                <a href="#" class="btn btn-outline-primary">View Profile</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-briefcase fa-3x text-success mb-3"></i>
+                                <h5>Jobs</h5>
+                                <p>Browse available positions</p>
+                                <a href="#" class="btn btn-outline-success">Find Jobs</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-cog fa-3x text-info mb-3"></i>
+                                <h5>Settings</h5>
+                                <p>Customize your preferences</p>
+                                <a href="#" class="btn btn-outline-info">Settings</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

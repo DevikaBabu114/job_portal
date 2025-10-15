@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Register as Employer | Job Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="text-center mb-0"><i class="fas fa-building me-2"></i>Register as Employer</h3>
+                </div>
+                <div class="card-body p-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Company Information -->
+                            <div class="col-md-6">
+                                <h5 class="text-success mb-3">Company Information</h5>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Username <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="username" value="{{ form_data.username }}" required>
+                                    {% if errors.username %}
+                                        <div class="text-danger small">{{ errors.username }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Company Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="company_name" value="{{ form_data.company_name }}" required>
+                                    {% if errors.company_name %}
+                                        <div class="text-danger small">{{ errors.company_name }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Contact Person <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="contact_person" value="{{ form_data.contact_person }}" required>
+                                    {% if errors.contact_person %}
+                                        <div class="text-danger small">{{ errors.contact_person }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Contact Information -->
+                            <div class="col-md-6">
+                                <h5 class="text-success mb-3">Contact Information</h5>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" name="email" value="{{ form_data.email }}" required>
+                                    {% if errors.email %}
+                                        <div class="text-danger small">{{ errors.email }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" name="phone" value="{{ form_data.phone }}" required>
+                                    {% if errors.phone %}
+                                        <div class="text-danger small">{{ errors.phone }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Password <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" name="password1" required>
+                                    {% if errors.password1 %}
+                                        <div class="text-danger small">{{ errors.password1 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" name="password2" required>
+                                    {% if errors.password2 %}
+                                        <div class="text-danger small">{{ errors.password2 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Company Address -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5 class="text-success mb-3">Company Address</h5>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Company Address <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" name="company_address" rows="3" required placeholder="Full company address including street, city, and country">{{ form_data.company_address }}</textarea>
+                                    {% if errors.company_address %}
+                                        <div class="text-danger small">{{ errors.company_address }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Submit -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="terms" required>
+                                    <label class="form-check-label" for="terms">
+                                        I agree to the <a href="#" class="text-success">Terms of Service</a> and <a href="#" class="text-success">Privacy Policy</a>
+                                    </label>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-building me-2"></i>Create Employer Account
+                                    </button>
+                                </div>
+
+                                <div class="text-center mt-3">
+                                    <p>Already have an account? <a href="{% url 'login' %}" class="text-success">Login here</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-label {
+    font-weight: 500;
+}
+.card {
+    border: none;
+    border-radius: 15px;
+}
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    padding: 12px;
+}
+</style>
+{% endblock %}
