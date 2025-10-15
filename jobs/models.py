@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.db import models
-from users.models import JobSeeker, Employer
 
 class Job(models.Model):
     JOB_TYPE_CHOICES = (
@@ -8,7 +7,7 @@ class Job(models.Model):
         ('part_time', 'Part Time'),
         ('contract', 'Contract'),
         ('internship', 'Internship'),
-        ('remote', 'Remote'),  # Added remote option
+        ('remote', 'Remote'),
     )
     
     EXPERIENCE_LEVEL_CHOICES = (
@@ -17,7 +16,7 @@ class Job(models.Model):
         ('senior', 'Senior Level'),
     )
     
-    employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
+    employer = models.ForeignKey('users.Employer', on_delete=models.CASCADE)  # Use string reference
     title = models.CharField(max_length=200)
     department = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
@@ -32,26 +31,44 @@ class Job(models.Model):
     def __str__(self):
         return self.title
     
+    def get_applications_count(self):
+        """Get total applications for this job"""
+        return self.application_set.count()
+    
+    def get_pending_applications_count(self):
+        """Get pending applications for this job"""
+        return self.application_set.filter(status='applied').count()
+    
     class Meta:
-        ordering = ['-created_at']  # Newest jobs first
+        ordering = ['-created_at']
 
 class Application(models.Model):
     STATUS_CHOICES = (
-        ('applied', 'Applied'),  # Changed from 'pending' to 'applied'
+        ('applied', 'Applied'),
         ('viewed', 'Viewed'),
         ('shortlisted', 'Shortlisted'),
         ('rejected', 'Rejected'),
         ('hired', 'Hired'),
     )
     
-    job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE)
+    job_seeker = models.ForeignKey('users.JobSeeker', on_delete=models.CASCADE)  # Use string reference
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='applied')
     applied_date = models.DateTimeField(auto_now_add=True)
-    cover_letter = models.TextField(blank=True)  # Added cover letter field
+    cover_letter = models.TextField(blank=True)
     
     def __str__(self):
         return f"{self.job_seeker} - {self.job}"
     
+    def is_pending(self):
+        return self.status == 'applied'
+    
+    def is_accepted(self):
+        return self.status in ['shortlisted', 'hired']
+    
+    def is_rejected(self):
+        return self.status == 'rejected'
+    
     class Meta:
-        unique_together = ['job_seeker', 'job']  # Prevent duplicate applications
+        unique_together = ['job_seeker', 'job']
+        ordering = ['-applied_date']

@@ -10,7 +10,7 @@
     <div class="search-box">
         <form method="GET" class="search-form">
             <input type="text" name="search" placeholder="Search for jobs, companies, or keywords..." 
-                   value="{{ request.GET.search }}" style="width: 70%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                   value="{{ search_query }}" style="width: 70%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
             <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
                 Search
             </button>
@@ -27,7 +27,25 @@
                 <p style="margin: 5px 0;"><strong>Company:</strong> {{ job.employer.company_name }}</p>
                 <p style="margin: 5px 0;"><strong>Location:</strong> {{ job.location }}</p>
                 <p style="margin: 5px 0;"><strong>Type:</strong> {{ job.get_job_type_display }}</p>
-                <a href="{% url 'job_detail' job.id %}" style="color: #007bff; text-decoration: none;">View Details →</a>
+                <p style="margin: 5px 0;"><strong>Experience:</strong> {{ job.get_experience_level_display }}</p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                    <a href="{% url 'job_detail' job.id %}" style="color: #007bff; text-decoration: none;">View Details →</a>
+                    
+                    {% if user.is_authenticated and user.jobseeker %}
+                        {% if job.id in user_has_applied %}
+                            <span style="color: #28a745; font-weight: bold;">✓ Applied</span>
+                        {% else %}
+                            <a href="{% url 'apply_job' job.id %}" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">
+                                Apply Now
+                            </a>
+                        {% endif %}
+                    {% elif not user.is_authenticated %}
+                        <a href="{% url 'login' %}?next={% url 'job_detail' job.id %}" style="background: #6c757d; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">
+                            Login to Apply
+                        </a>
+                    {% endif %}
+                </div>
             </div>
             {% endfor %}
         {% else %}

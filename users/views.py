@@ -264,20 +264,35 @@ def dashboard(request):
     except Exception as e:
         messages.error(request, 'Error accessing dashboard.')
         return redirect('home')
+
 @login_required
 def job_seeker_dashboard(request):
-    """Job seeker dashboard view"""
+    """Job seeker dashboard view with applied jobs"""
     if not hasattr(request.user, 'jobseeker'):
         return redirect('login')
     
     job_seeker = request.user.jobseeker
     
+    # Get applied jobs with status information
+    applications = Application.objects.filter(
+        job_seeker=job_seeker
+    ).select_related('job', 'job__employer').order_by('-applied_date')[:5]  # Recent 5 applications
+    
+    # Count applications by status
+    applied_count = Application.objects.filter(job_seeker=job_seeker, status='applied').count()
+    shortlisted_count = Application.objects.filter(job_seeker=job_seeker, status='shortlisted').count()
+    hired_count = Application.objects.filter(job_seeker=job_seeker, status='hired').count()
+    
     context = {
         'job_seeker': job_seeker,
+        'applications': applications,
+        'applied_count': applied_count,
+        'shortlisted_count': shortlisted_count,
+        'hired_count': hired_count,
+        'total_applications': applied_count + shortlisted_count + hired_count,
     }
     return render(request, 'users/job_seeker_dashboard.html', context)
 
- 
 @login_required
 def update_jobseeker_profile(request):
     """Update job seeker profile - handles both AJAX and regular form submission"""
@@ -364,15 +379,24 @@ def employer_dashboard(request):
         total_jobs = Job.objects.filter(employer=employer).count()
         active_jobs = Job.objects.filter(employer=employer, is_active=True).count()
         
-        # Get application statistics (you can enhance this later)
+        # Get application statistics
         total_applications = Application.objects.filter(job__employer=employer).count()
         new_applications = Application.objects.filter(
             job__employer=employer, 
             status='applied'
         ).count()
+        shortlisted_applications = Application.objects.filter(
+            job__employer=employer, 
+            status='shortlisted'
+        ).count()
         
         # Get recent jobs (last 5)
         recent_jobs = Job.objects.filter(employer=employer).order_by('-created_at')[:5]
+        
+        # Get recent applications (last 5)
+        recent_applications = Application.objects.filter(
+            job__employer=employer
+        ).select_related('job_seeker', 'job').order_by('-applied_date')[:5]
         
         context = {
             'employer': employer,
@@ -380,13 +404,16 @@ def employer_dashboard(request):
             'active_jobs': active_jobs,
             'total_applications': total_applications,
             'new_applications': new_applications,
+            'shortlisted_applications': shortlisted_applications,
             'recent_jobs': recent_jobs,
+            'recent_applications': recent_applications,
         }
         return render(request, 'users/employer_dashboard.html', context)
         
     except Employer.DoesNotExist:
         messages.error(request, 'Employer profile not found.')
         return redirect('home')
+
 @login_required
 def edit_company_profile(request):
     """Edit company profile for employers"""
@@ -402,10 +429,6 @@ def edit_company_profile(request):
         employer.contact_person = request.POST.get('contact_person', employer.contact_person)
         employer.phone = request.POST.get('phone', employer.phone)
         employer.company_address = request.POST.get('company_address', employer.company_address)
-        employer.industry = request.POST.get('industry', employer.industry)
-        employer.company_description = request.POST.get('company_description', employer.company_description)
-        employer.website = request.POST.get('website', employer.website)
-        
         
         # Update user email if changed
         new_email = request.POST.get('email')
@@ -416,6 +439,7 @@ def edit_company_profile(request):
                 request.user.email = new_email
                 request.user.save()
         
+        employer.save()
         messages.success(request, 'Company profile updated successfully!')
         return redirect('employer_dashboard')
     

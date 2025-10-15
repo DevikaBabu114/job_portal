@@ -31,6 +31,36 @@
             {% endif %}
         </div>
         
+        <!-- Application Status for Job Seekers -->
+        {% if user.is_authenticated and user.jobseeker %}
+            <div style="margin: 20px 0; padding: 15px; border-radius: 5px; background: {% if has_applied %}#d4edda{% else %}#fff3cd{% endif %};">
+                {% if has_applied %}
+                    <p style="margin: 0; color: #155724; font-weight: bold;">
+                        ✓ You have already applied to this position
+                    </p>
+                    <a href="{% url 'applied_jobs' %}" style="color: #007bff; text-decoration: none; font-size: 0.9em;">
+                        View your applications
+                    </a>
+                {% else %}
+                    <p style="margin: 0 0 10px 0; color: #856404;">
+                        Interested in this position?
+                    </p>
+                    <a href="{% url 'apply_job' job.id %}" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Apply Now
+                    </a>
+                {% endif %}
+            </div>
+        {% elif not user.is_authenticated %}
+            <div style="margin: 20px 0; padding: 15px; border-radius: 5px; background: #d1ecf1;">
+                <p style="margin: 0; color: #0c5460;">
+                    Please login as a job seeker to apply for this position
+                </p>
+                <a href="{% url 'login' %}?next={% url 'job_detail' job.id %}" style="background: #17a2b8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">
+                    Login to Apply
+                </a>
+            </div>
+        {% endif %}
+        
         <div style="margin: 20px 0;">
             <h3>Job Description</h3>
             <p style="line-height: 1.6;">{{ job.description|linebreaks }}</p>
@@ -40,6 +70,17 @@
             <h3>Requirements</h3>
             <p style="line-height: 1.6;">{{ job.requirements|linebreaks }}</p>
         </div>
+
+        <!-- Application Section for Job Seekers -->
+        {% if user.is_authenticated and user.jobseeker and not has_applied %}
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px;">
+            <h3>Ready to Apply?</h3>
+            <p>Submit your application for this position.</p>
+            <a href="{% url 'apply_job' job.id %}" style="background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                Submit Application
+            </a>
+        </div>
+        {% endif %}
 
         <div style="margin-top: 30px; text-align: center;">
             <a href="{% url 'find_jobs' %}" style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">

@@ -6,9 +6,14 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1><i class="fas fa-briefcase me-2"></i>My Jobs</h1>
-        <a href="{% url 'post_job' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Post New Job
-        </a>
+        <div>
+            <a href="{% url 'employer_applications' %}" class="btn btn-info me-2">
+                <i class="fas fa-users me-2"></i>View All Applications
+            </a>
+            <a href="{% url 'post_job' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Post New Job
+            </a>
+        </div>
     </div>
 
     {% if messages %}
@@ -21,6 +26,42 @@
         {% endfor %}
     </div>
     {% endif %}
+
+    <!-- Application Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4 class="card-title">{{ total_jobs }}</h4>
+                    <p class="card-text">Total Jobs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4 class="card-title">{{ active_jobs }}</h4>
+                    <p class="card-text">Active Jobs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4 class="card-title">{{ total_applications }}</h4>
+                    <p class="card-text">Total Applications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4 class="card-title">{{ pending_applications }}</h4>
+                    <p class="card-text">Pending Reviews</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% if jobs %}
     <div class="row">
@@ -45,6 +86,22 @@
                         <i class="fas fa-clock me-2"></i>Posted {{ job.created_at|timesince }} ago
                     </p>
 
+                    <!-- Application Statistics for this Job -->
+                    <div class="application-stats mb-3">
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>
+                                {{ job.application_count }} application{{ job.application_count|pluralize }}
+                            </small>
+                            {% if job.pending_count > 0 %}
+                            <small class="text-warning">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ job.pending_count }} pending
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+
                     <div class="job-meta mb-3">
                         <span class="badge bg-light text-dark me-2">
                             <i class="fas fa-briefcase me-1"></i>{{ job.get_job_type_display }}
@@ -56,13 +113,16 @@
 
                     <div class="job-actions">
                         <div class="btn-group w-100" role="group">
-                            <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary btn-sm">
+                            <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary btn-sm" title="View Job">
                                 <i class="fas fa-eye me-1"></i>View
                             </a>
-                            <a href="{% url 'edit_job' job.id %}" class="btn btn-outline-secondary btn-sm">
+                            <a href="{% url 'employer_job_applications' job.id %}" class="btn btn-outline-info btn-sm" title="View Applications">
+                                <i class="fas fa-users me-1"></i>Apps
+                            </a>
+                            <a href="{% url 'edit_job' job.id %}" class="btn btn-outline-secondary btn-sm" title="Edit Job">
                                 <i class="fas fa-edit me-1"></i>Edit
                             </a>
-                            <a href="{% url 'toggle_job_status' job.id %}" class="btn btn-sm {% if job.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                            <a href="{% url 'toggle_job_status' job.id %}" class="btn btn-sm {% if job.is_active %}btn-warning{% else %}btn-success{% endif %}" title="{% if job.is_active %}Pause Job{% else %}Activate Job{% endif %}">
                                 <i class="fas {% if job.is_active %}fa-pause{% else %}fa-play{% endif %} me-1"></i>
                                 {% if job.is_active %}Pause{% else %}Activate{% endif %}
                             </a>
@@ -126,6 +186,13 @@
     padding: 0.4rem 0.6rem;
 }
 
+.application-stats {
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border-left: 3px solid #007bff;
+}
+
 .btn-group .btn {
     border-radius: 5px;
     margin: 0 2px;
@@ -156,6 +223,20 @@
 
 .text-muted {
     color: #666 !important;
+}
+
+/* Stats cards */
+.card.bg-primary, .card.bg-success, .card.bg-info, .card.bg-warning {
+    border: none;
+    border-radius: 10px;
+}
+
+.card.bg-primary .card-title, 
+.card.bg-success .card-title, 
+.card.bg-info .card-title, 
+.card.bg-warning .card-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 </style>
 {% endblock %}

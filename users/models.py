@@ -17,26 +17,37 @@ class JobSeeker(models.Model):
     def __str__(self):
         return self.full_name
     
+    def get_applied_jobs(self):
+        """Get all jobs applied by this job seeker"""
+        from jobs.models import Application  # Import here to avoid circular import
+        return Application.objects.filter(job_seeker=self).select_related('job')
+    
+    def get_applications_by_status(self, status):
+        """Get applications by status"""
+        from jobs.models import Application
+        return Application.objects.filter(job_seeker=self, status=status)
+    
+    def has_applied_to_job(self, job):
+        """Check if job seeker has applied to a specific job"""
+        from jobs.models import Application
+        return Application.objects.filter(job_seeker=self, job=job).exists()
+    
     @property
     def skills_list(self):
-        """Convert skills string to list for display"""
         if self.skills:
             return [skill.strip() for skill in self.skills.split(',') if skill.strip()]
         return []
     
     @property
     def has_resume(self):
-        """Check if resume exists"""
         return bool(self.resume)
     
     def get_experience_preview(self):
-        """Get first 100 characters of experience for preview"""
         if self.experience:
             return self.experience[:100] + '...' if len(self.experience) > 100 else self.experience
         return "No experience provided"
     
     def get_education_preview(self):
-        """Get first 100 characters of education for preview"""
         if self.education:
             return self.education[:100] + '...' if len(self.education) > 100 else self.education
         return "No education provided"
@@ -52,3 +63,30 @@ class Employer(models.Model):
     
     def __str__(self):
         return self.company_name
+    
+    def get_posted_jobs(self):
+        """Get all jobs posted by this employer"""
+        from jobs.models import Job
+        return Job.objects.filter(employer=self)
+    
+    def get_active_jobs(self):
+        """Get active jobs posted by this employer"""
+        from jobs.models import Job
+        return Job.objects.filter(employer=self, is_active=True)
+    
+    def get_job_applications(self, job=None):
+        """Get all applications for employer's jobs"""
+        from jobs.models import Application
+        if job:
+            return Application.objects.filter(job=job).select_related('job_seeker', 'job')
+        return Application.objects.filter(job__employer=self).select_related('job_seeker', 'job')
+    
+    def get_applications_count(self):
+        """Get total applications across all jobs"""
+        from jobs.models import Application
+        return Application.objects.filter(job__employer=self).count()
+    
+    def get_pending_applications_count(self):
+        """Get pending applications across all jobs"""
+        from jobs.models import Application
+        return Application.objects.filter(job__employer=self, status='applied').count()

@@ -23,7 +23,8 @@
                 <ul>
                     <li><a class="nav-link active" data-section="profile"><i class="fas fa-user"></i> View Profile</a></li>
                     <li><a href="{% url 'find_jobs' %}" class="nav-link"><i class="fas fa-search"></i> Find Jobs</a></li>
-                    <li><a class="nav-link" data-section="applications"><i class="fas fa-file-alt"></i> My Applications</a></li>
+                    <li><a href="{% url 'applied_jobs' %}" class="nav-link"><i class="fas fa-file-alt"></i> My Applications</a></li>
+                    <li><a class="nav-link" data-section="applications"><i class="fas fa-file-alt"></i> Application Stats</a></li>
                     <li><a class="nav-link" data-section="saved"><i class="fas fa-bookmark"></i> Saved Jobs</a></li>
                 </ul>
             </nav>
@@ -59,16 +60,16 @@
                             </p>
                             <div class="profile-stats">
                                 <div class="stat">
-                                    <span class="stat-number">0</span>
-                                    <span class="stat-label">Applications</span>
+                                    <span class="stat-number">{{ total_applications }}</span>
+                                    <span class="stat-label">Total Applications</span>
                                 </div>
                                 <div class="stat">
-                                    <span class="stat-number">0</span>
-                                    <span class="stat-label">Interviews</span>
+                                    <span class="stat-number">{{ shortlisted_count }}</span>
+                                    <span class="stat-label">Shortlisted</span>
                                 </div>
                                 <div class="stat">
-                                    <span class="stat-number">0</span>
-                                    <span class="stat-label">Saved Jobs</span>
+                                    <span class="stat-number">{{ hired_count }}</span>
+                                    <span class="stat-label">Hired</span>
                                 </div>
                             </div>
                         </div>
@@ -133,16 +134,81 @@
                 </div>
             </section>
 
-            <!-- Applications Section -->
+            <!-- Applications Stats Section -->
             <section id="applications" class="content-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-file-alt"></i> My Applications</h2>
+                    <h2><i class="fas fa-chart-bar"></i> Application Statistics</h2>
                 </div>
                 <div class="applications-content">
-                    <p>Your job applications will appear here.</p>
-                    <a href="{% url 'find_jobs' %}" class="btn-primary" style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">
-                        Find Jobs to Apply
-                    </a>
+                    <!-- Application Statistics Cards -->
+                    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div class="stat-card" style="background: #007bff; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <h3 style="margin: 0 0 0.5rem 0; font-size: 2rem;">{{ total_applications }}</h3>
+                            <p style="margin: 0; font-weight: 500;">Total Applications</p>
+                        </div>
+                        <div class="stat-card" style="background: #28a745; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <h3 style="margin: 0 0 0.5rem 0; font-size: 2rem;">{{ applied_count }}</h3>
+                            <p style="margin: 0; font-weight: 500;">Applied</p>
+                        </div>
+                        <div class="stat-card" style="background: #ffc107; color: black; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <h3 style="margin: 0 0 0.5rem 0; font-size: 2rem;">{{ shortlisted_count }}</h3>
+                            <p style="margin: 0; font-weight: 500;">Shortlisted</p>
+                        </div>
+                        <div class="stat-card" style="background: #17a2b8; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <h3 style="margin: 0 0 0.5rem 0; font-size: 2rem;">{{ hired_count }}</h3>
+                            <p style="margin: 0; font-weight: 500;">Hired</p>
+                        </div>
+                    </div>
+
+                    <!-- Recent Applications -->
+                    <div class="recent-applications">
+                        <h3 style="margin-bottom: 1rem;">Recent Applications</h3>
+                        {% if applications %}
+                            <div class="applications-list">
+                                {% for application in applications %}
+                                <div class="application-item" style="border: 1px solid #ddd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <h4 style="margin: 0 0 0.5rem 0;">{{ application.job.title }}</h4>
+                                            <p style="margin: 0 0 0.5rem 0; color: #666;">
+                                                {{ application.job.employer.company_name }} • {{ application.job.location }}
+                                            </p>
+                                            <p style="margin: 0; font-size: 0.9rem;">
+                                                Applied: {{ application.applied_date|date:"M j, Y" }}
+                                            </p>
+                                        </div>
+                                        <span class="status-badge 
+                                            {% if application.status == 'applied' %}bg-primary
+                                            {% elif application.status == 'shortlisted' %}bg-warning
+                                            {% elif application.status == 'hired' %}bg-success
+                                            {% elif application.status == 'rejected' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}"
+                                            style="color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">
+                                            {{ application.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div style="margin-top: 1rem;">
+                                        <a href="{% url 'job_detail' application.job.id %}" class="btn btn-outline-primary btn-sm">
+                                            View Job
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div style="text-align: center; margin-top: 1rem;">
+                                <a href="{% url 'applied_jobs' %}" class="btn btn-primary">
+                                    View All Applications
+                                </a>
+                            </div>
+                        {% else %}
+                            <div style="text-align: center; padding: 2rem;">
+                                <p style="color: #666; margin-bottom: 1rem;">You haven't applied to any jobs yet.</p>
+                                <a href="{% url 'find_jobs' %}" class="btn btn-primary">
+                                    Find Jobs to Apply
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </section>
 
@@ -501,8 +567,7 @@
 
 /* Applications and Saved Sections */
 .applications-content, .saved-content {
-    text-align: center;
-    padding: 3rem 2rem;
+    padding: 1rem 0;
 }
 
 .applications-content p, .saved-content p {
@@ -633,6 +698,51 @@
     cursor: pointer;
 }
 
+/* Button Styles */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Status Badges */
+.bg-primary { background: #007bff !important; }
+.bg-success { background: #28a745 !important; }
+.bg-warning { background: #ffc107 !important; color: black !important; }
+.bg-danger { background: #dc3545 !important; }
+.bg-secondary { background: #6c757d !important; }
+.bg-info { background: #17a2b8 !important; }
+
 @media (max-width: 768px) {
     .dashboard-main {
         flex-direction: column;
@@ -650,6 +760,9 @@
     }
     .form-grid {
         grid-template-columns: 1fr;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
     }
 }
 </style>
