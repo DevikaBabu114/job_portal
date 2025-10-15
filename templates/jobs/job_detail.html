@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }} | JobPortal{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <a href="{% url 'find_jobs' %}" style="color: #007bff; text-decoration: none; margin-bottom: 20px; display: inline-block;">← Back to Jobs</a>
+    
+    <div style="border: 1px solid #ddd; padding: 20px; border-radius: 5px; margin-top: 20px;">
+        <h1 style="margin: 0 0 10px 0;">{{ job.title }}</h1>
+        <h3 style="color: #007bff; margin: 0 0 20px 0;">{{ job.employer.company_name }}</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+            <div>
+                <strong>Location:</strong><br>
+                {{ job.location }}
+            </div>
+            <div>
+                <strong>Job Type:</strong><br>
+                {{ job.get_job_type_display }}
+            </div>
+            <div>
+                <strong>Experience:</strong><br>
+                {{ job.get_experience_level_display }}
+            </div>
+            {% if job.salary %}
+            <div>
+                <strong>Salary:</strong><br>
+                {{ job.salary }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <h3>Job Description</h3>
+            <p style="line-height: 1.6;">{{ job.description|linebreaks }}</p>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <h3>Requirements</h3>
+            <p style="line-height: 1.6;">{{ job.requirements|linebreaks }}</p>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="{% url 'find_jobs' %}" style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+                Back to Job Search
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

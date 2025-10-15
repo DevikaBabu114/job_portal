@@ -21,8 +21,8 @@
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a class="nav-link" data-section="profile"><i class="fas fa-user"></i> View Profile</a></li>
-                    <li><a class="nav-link" data-section="search"><i class="fas fa-search"></i> Search Jobs</a></li>
+                    <li><a class="nav-link active" data-section="profile"><i class="fas fa-user"></i> View Profile</a></li>
+                    <li><a href="{% url 'find_jobs' %}" class="nav-link"><i class="fas fa-search"></i> Find Jobs</a></li>
                     <li><a class="nav-link" data-section="applications"><i class="fas fa-file-alt"></i> My Applications</a></li>
                     <li><a class="nav-link" data-section="saved"><i class="fas fa-bookmark"></i> Saved Jobs</a></li>
                 </ul>
@@ -133,16 +133,6 @@
                 </div>
             </section>
 
-            <!-- Search Jobs Section -->
-            <section id="search" class="content-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-search"></i> Search Jobs</h2>
-                </div>
-                <div class="search-content">
-                    <p>Job search functionality will be implemented here.</p>
-                </div>
-            </section>
-
             <!-- Applications Section -->
             <section id="applications" class="content-section">
                 <div class="section-header">
@@ -150,6 +140,9 @@
                 </div>
                 <div class="applications-content">
                     <p>Your job applications will appear here.</p>
+                    <a href="{% url 'find_jobs' %}" class="btn-primary" style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">
+                        Find Jobs to Apply
+                    </a>
                 </div>
             </section>
 
@@ -160,6 +153,9 @@
                 </div>
                 <div class="saved-content">
                     <p>Your saved jobs will appear here.</p>
+                    <a href="{% url 'find_jobs' %}" class="btn-primary" style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">
+                        Find Jobs to Save
+                    </a>
                 </div>
             </section>
         </main>
@@ -503,6 +499,18 @@
     margin-bottom: 0.5rem;
 }
 
+/* Applications and Saved Sections */
+.applications-content, .saved-content {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.applications-content p, .saved-content p {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
 /* Modal Styles */
 .modal {
     display: none;
@@ -548,6 +556,58 @@
     padding: 2rem;
 }
 
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.form-section h4 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.95rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-text {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.current-file {
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
 .form-actions {
     display: flex;
     justify-content: flex-end;
@@ -588,25 +648,22 @@
         margin-right: 0;
         margin-bottom: 1rem;
     }
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 
 <script>
-// Simple JavaScript that will definitely work
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Dashboard loaded - testing navigation');
+    console.log('Dashboard loaded');
     
     // Navigation functionality
-    const navLinks = document.querySelectorAll('.sidebar-nav a');
+    const navLinks = document.querySelectorAll('.sidebar-nav a[data-section]');
     const contentSections = document.querySelectorAll('.content-section');
-    
-    console.log('Found nav links:', navLinks.length);
-    console.log('Found content sections:', contentSections.length);
     
     // Function to show section
     function showSection(sectionId) {
-        console.log('Attempting to show section:', sectionId);
-        
         // Hide all sections
         contentSections.forEach(section => {
             section.classList.remove('active');
@@ -621,9 +678,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const targetSection = document.getElementById(sectionId);
         if (targetSection) {
             targetSection.classList.add('active');
-            console.log('Successfully showed section:', sectionId);
-        } else {
-            console.error('Section not found:', sectionId);
         }
         
         // Activate clicked nav link
@@ -637,9 +691,7 @@ document.addEventListener('DOMContentLoaded', function() {
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation();
             const sectionId = this.getAttribute('data-section');
-            console.log('Nav link clicked:', sectionId);
             showSection(sectionId);
         });
     });
@@ -650,23 +702,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeModalBtn = document.getElementById('closeModalBtn');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     
-    console.log('Edit profile button:', editProfileBtn);
-    console.log('Modal:', editProfileModal);
-    
     // Open modal
     if (editProfileBtn) {
         editProfileBtn.addEventListener('click', function() {
-            console.log('Edit profile clicked');
             if (editProfileModal) {
                 editProfileModal.style.display = 'block';
-                console.log('Modal should be visible now');
             }
         });
     }
     
     // Close modal function
     function closeModal() {
-        console.log('Closing modal');
         if (editProfileModal) {
             editProfileModal.style.display = 'none';
         }
@@ -693,7 +739,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (editProfileForm) {
         editProfileForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            console.log('Form submission intercepted');
             
             const formData = new FormData(this);
             const saveBtn = this.querySelector('.btn-save');
@@ -713,7 +758,6 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Server response:', data);
                 if (data.success) {
                     alert('Profile updated successfully!');
                     closeModal();
@@ -735,20 +779,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // Profile section is already visible due to 'active' class in HTML
-    // No need to call showSection() on load
 });
-
-// Test function
-function testJS() {
-    alert('JavaScript is working!');
-    console.log('JavaScript test successful');
-}
 </script>
-
-<!-- Test button -->
-<div style="position: fixed; bottom: 10px; right: 10px; z-index: 9999;">
-    <button onclick="testJS()" style="background: red; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">TEST JS</button>
-</div>
 {% endblock %}

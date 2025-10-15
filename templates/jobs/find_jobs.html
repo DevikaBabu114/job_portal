@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Find Jobs | JobPortal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Find Jobs</h1>
+    
+    <!-- Simple Search Form -->
+    <div class="search-box">
+        <form method="GET" class="search-form">
+            <input type="text" name="search" placeholder="Search for jobs, companies, or keywords..." 
+                   value="{{ request.GET.search }}" style="width: 70%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Search
+            </button>
+        </form>
+    </div>
+
+    <!-- Job Listings -->
+    <div class="job-list">
+        {% if jobs %}
+            <p>Found {{ jobs|length }} job{{ jobs|pluralize }}</p>
+            {% for job in jobs %}
+            <div class="job-card" style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                <h3 style="margin: 0 0 10px 0;">{{ job.title }}</h3>
+                <p style="margin: 5px 0;"><strong>Company:</strong> {{ job.employer.company_name }}</p>
+                <p style="margin: 5px 0;"><strong>Location:</strong> {{ job.location }}</p>
+                <p style="margin: 5px 0;"><strong>Type:</strong> {{ job.get_job_type_display }}</p>
+                <a href="{% url 'job_detail' job.id %}" style="color: #007bff; text-decoration: none;">View Details →</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <p>No jobs found. Try a different search term.</p>
+                <a href="{% url 'find_jobs' %}" style="color: #007bff; text-decoration: none;">Browse all jobs</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.search-box {
+    margin: 20px 0;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.job-list {
+    margin-top: 20px;
+}
+
+.job-card:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

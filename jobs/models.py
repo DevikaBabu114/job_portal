@@ -8,6 +8,7 @@ class Job(models.Model):
         ('part_time', 'Part Time'),
         ('contract', 'Contract'),
         ('internship', 'Internship'),
+        ('remote', 'Remote'),  # Added remote option
     )
     
     EXPERIENCE_LEVEL_CHOICES = (
@@ -30,10 +31,14 @@ class Job(models.Model):
     
     def __str__(self):
         return self.title
+    
+    class Meta:
+        ordering = ['-created_at']  # Newest jobs first
 
 class Application(models.Model):
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
+        ('applied', 'Applied'),  # Changed from 'pending' to 'applied'
+        ('viewed', 'Viewed'),
         ('shortlisted', 'Shortlisted'),
         ('rejected', 'Rejected'),
         ('hired', 'Hired'),
@@ -41,8 +46,12 @@ class Application(models.Model):
     
     job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='applied')
     applied_date = models.DateTimeField(auto_now_add=True)
+    cover_letter = models.TextField(blank=True)  # Added cover letter field
     
     def __str__(self):
         return f"{self.job_seeker} - {self.job}"
+    
+    class Meta:
+        unique_together = ['job_seeker', 'job']  # Prevent duplicate applications

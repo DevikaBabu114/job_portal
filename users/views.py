@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from .models import JobSeeker, Employer
+from jobs.models import Job, Application  # Import Job model from jobs app
+
 import os
 
 def user_login(request):
@@ -262,21 +264,20 @@ def dashboard(request):
     except Exception as e:
         messages.error(request, 'Error accessing dashboard.')
         return redirect('home')
-
 @login_required
 def job_seeker_dashboard(request):
-    """Job Seeker Dashboard"""
-    try:
-        job_seeker = request.user.jobseeker
-        context = {
-            'user': request.user,
-            'job_seeker': job_seeker
-        }
-        return render(request, 'users/job_seeker_dashboard.html', context)
-    except JobSeeker.DoesNotExist:
-        messages.error(request, 'Job seeker profile not found.')
-        return redirect('home')
+    """Job seeker dashboard view"""
+    if not hasattr(request.user, 'jobseeker'):
+        return redirect('login')
+    
+    job_seeker = request.user.jobseeker
+    
+    context = {
+        'job_seeker': job_seeker,
+    }
+    return render(request, 'users/job_seeker_dashboard.html', context)
 
+ 
 @login_required
 def update_jobseeker_profile(request):
     """Update job seeker profile - handles both AJAX and regular form submission"""
@@ -351,14 +352,79 @@ def update_jobseeker_profile(request):
 
 @login_required
 def employer_dashboard(request):
-    """Employer Dashboard"""
+    """Employer Dashboard with job statistics"""
+    if not hasattr(request.user, 'employer'):
+        messages.error(request, 'Only employers can access this dashboard.')
+        return redirect('dashboard')
+    
     try:
         employer = request.user.employer
+        
+        # Get job statistics
+        total_jobs = Job.objects.filter(employer=employer).count()
+        active_jobs = Job.objects.filter(employer=employer, is_active=True).count()
+        
+        # Get application statistics (you can enhance this later)
+        total_applications = Application.objects.filter(job__employer=employer).count()
+        new_applications = Application.objects.filter(
+            job__employer=employer, 
+            status='applied'
+        ).count()
+        
+        # Get recent jobs (last 5)
+        recent_jobs = Job.objects.filter(employer=employer).order_by('-created_at')[:5]
+        
         context = {
-            'user': request.user,
-            'employer': employer
+            'employer': employer,
+            'total_jobs': total_jobs,
+            'active_jobs': active_jobs,
+            'total_applications': total_applications,
+            'new_applications': new_applications,
+            'recent_jobs': recent_jobs,
         }
         return render(request, 'users/employer_dashboard.html', context)
+        
     except Employer.DoesNotExist:
         messages.error(request, 'Employer profile not found.')
         return redirect('home')
+@login_required
+def edit_company_profile(request):
+    """Edit company profile for employers"""
+    if not hasattr(request.user, 'employer'):
+        messages.error(request, 'Only employers can edit company profiles.')
+        return redirect('dashboard')
+    
+    employer = request.user.employer
+    
+    if request.method == 'POST':
+        # Update employer fields
+        employer.company_name = request.POST.get('company_name', employer.company_name)
+        employer.contact_person = request.POST.get('contact_person', employer.contact_person)
+        employer.phone = request.POST.get('phone', employer.phone)
+        employer.company_address = request.POST.get('company_address', employer.company_address)
+        employer.industry = request.POST.get('industry', employer.industry)
+        employer.company_description = request.POST.get('company_description', employer.company_description)
+        employer.website = request.POST.get('website', employer.website)
+        
+        # Handle logo upload
+        if 'company_logo' in request.FILES:
+            employer.company_logo = request.FILES['company_logo']
+        
+        employer.save()
+        
+        # Update user email if changed
+        new_email = request.POST.get('email')
+        if new_email and new_email != request.user.email:
+            if User.objects.filter(email=new_email).exclude(id=request.user.id).exists():
+                messages.error(request, 'This email is already registered with another account.')
+            else:
+                request.user.email = new_email
+                request.user.save()
+        
+        messages.success(request, 'Company profile updated successfully!')
+        return redirect('employer_dashboard')
+    
+    context = {
+        'employer': employer,
+    }
+    return render(request, 'users/edit_company_profile.html', context)
