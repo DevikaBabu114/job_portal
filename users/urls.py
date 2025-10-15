@@ -12,6 +12,9 @@ urlpatterns = [
     path('register/job-seeker/', views.register_job_seeker, name='register_job_seeker'),
     path('register/employer/', views.register_employer, name='register_employer'),
     
-    # Dashboard URL (temporary - we'll create the view later)
-    path('dashboard/', TemplateView.as_view(template_name='dashboard.html'), name='dashboard'),
+   # Dashboard URLs
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/job-seeker/', views.job_seeker_dashboard, name='job_seeker_dashboard'),
+    path('dashboard/employer/', views.employer_dashboard, name='employer_dashboard'),
+    path('profile/update/', views.update_jobseeker_profile, name='update_jobseeker_profile'),
 ]

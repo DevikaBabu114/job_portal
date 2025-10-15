@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
 from .models import JobSeeker, Employer
 import os
 
@@ -242,4 +244,121 @@ def register_employer(request):
         'form_data': form_data,
         'errors': errors
     }
-    return render(request, 'register_employer.html', context)  # Fixed the missing closing parenthesis
+    return render(request, 'register_employer.html', context)
+
+@login_required
+def dashboard(request):
+    """Main dashboard - redirects based on user type"""
+    try:
+        # Check if user is a job seeker
+        if hasattr(request.user, 'jobseeker'):
+            return redirect('job_seeker_dashboard')
+        # Check if user is an employer
+        elif hasattr(request.user, 'employer'):
+            return redirect('employer_dashboard')
+        else:
+            messages.error(request, 'User profile not found.')
+            return redirect('home')
+    except Exception as e:
+        messages.error(request, 'Error accessing dashboard.')
+        return redirect('home')
+
+@login_required
+def job_seeker_dashboard(request):
+    """Job Seeker Dashboard"""
+    try:
+        job_seeker = request.user.jobseeker
+        context = {
+            'user': request.user,
+            'job_seeker': job_seeker
+        }
+        return render(request, 'users/job_seeker_dashboard.html', context)
+    except JobSeeker.DoesNotExist:
+        messages.error(request, 'Job seeker profile not found.')
+        return redirect('home')
+
+@login_required
+def update_jobseeker_profile(request):
+    """Update job seeker profile - handles both AJAX and regular form submission"""
+    if request.method == 'POST':
+        try:
+            job_seeker = request.user.jobseeker
+            
+            # Update job seeker fields
+            job_seeker.full_name = request.POST.get('full_name', job_seeker.full_name)
+            job_seeker.phone = request.POST.get('phone', job_seeker.phone)
+            job_seeker.location = request.POST.get('location', job_seeker.location)
+            job_seeker.skills = request.POST.get('skills', job_seeker.skills)
+            job_seeker.experience = request.POST.get('experience', job_seeker.experience)
+            job_seeker.education = request.POST.get('education', job_seeker.education)
+            job_seeker.bio = request.POST.get('bio', job_seeker.bio)
+            
+            # Handle resume upload
+            if 'resume' in request.FILES:
+                job_seeker.resume = request.FILES['resume']
+            
+            job_seeker.save()
+            
+            # Update user email if changed
+            new_email = request.POST.get('email')
+            if new_email and new_email != request.user.email:
+                if User.objects.filter(email=new_email).exclude(id=request.user.id).exists():
+                    error_msg = 'This email is already registered with another account.'
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({'success': False, 'message': error_msg})
+                    else:
+                        messages.error(request, error_msg)
+                        return redirect('job_seeker_dashboard')
+                request.user.email = new_email
+                request.user.save()
+            
+            # Update user first name if full name changed
+            request.user.first_name = job_seeker.full_name
+            request.user.save()
+            
+            # Return response based on request type
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Profile updated successfully!',
+                    'data': {
+                        'full_name': job_seeker.full_name,
+                        'location': job_seeker.location,
+                        'skills': job_seeker.skills,
+                        'bio': job_seeker.bio
+                    }
+                })
+            else:
+                messages.success(request, 'Profile updated successfully!')
+                return redirect('job_seeker_dashboard')
+                
+        except JobSeeker.DoesNotExist:
+            error_msg = 'Job seeker profile not found.'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': error_msg})
+            else:
+                messages.error(request, error_msg)
+                return redirect('job_seeker_dashboard')
+        except Exception as e:
+            error_msg = f'Error updating profile: {str(e)}'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': error_msg})
+            else:
+                messages.error(request, error_msg)
+                return redirect('job_seeker_dashboard')
+    
+    return redirect('job_seeker_dashboard')
+
+@login_required
+def employer_dashboard(request):
+    """Employer Dashboard"""
+    try:
+        employer = request.user.employer
+        context = {
+            'user': request.user,
+            'employer': employer
+        }
+        return render(request, 'users/employer_dashboard.html', context)
+    except Employer.DoesNotExist:
+        messages.error(request, 'Employer profile not found.')
+        return redirect('home')

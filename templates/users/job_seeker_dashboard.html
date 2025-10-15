@@ -1,0 +1,754 @@
+{% extends 'base.html' %}
+
+{% block title %}Job Seeker Dashboard | JobPortal{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <h1><i class="fas fa-briefcase"></i> JobSeeker Dashboard</h1>
+            <div class="user-info">
+                <span>Welcome, {{ job_seeker.full_name }}!</span>
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="dashboard-main">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a class="nav-link" data-section="profile"><i class="fas fa-user"></i> View Profile</a></li>
+                    <li><a class="nav-link" data-section="search"><i class="fas fa-search"></i> Search Jobs</a></li>
+                    <li><a class="nav-link" data-section="applications"><i class="fas fa-file-alt"></i> My Applications</a></li>
+                    <li><a class="nav-link" data-section="saved"><i class="fas fa-bookmark"></i> Saved Jobs</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="content-area">
+            <!-- Profile Section -->
+            <section id="profile" class="content-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-user"></i> My Profile</h2>
+                    <button class="edit-profile-btn" id="editProfileBtn">Edit Profile</button>
+                </div>
+                
+                <div class="profile-content">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <img src="https://via.placeholder.com/150" alt="Profile Picture">
+                            <div class="profile-status">
+                                <span class="status-badge active">Active</span>
+                            </div>
+                        </div>
+                        <div class="profile-info">
+                            <h3>{{ job_seeker.full_name }}</h3>
+                            <p class="profile-title">Job Seeker</p>
+                            <p class="profile-location">
+                                <i class="fas fa-map-marker-alt"></i> 
+                                {{ job_seeker.location|default:"Location not specified" }}
+                            </p>
+                            <p class="profile-phone">
+                                <i class="fas fa-phone"></i> 
+                                {{ job_seeker.phone }}
+                            </p>
+                            <div class="profile-stats">
+                                <div class="stat">
+                                    <span class="stat-number">0</span>
+                                    <span class="stat-label">Applications</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">0</span>
+                                    <span class="stat-label">Interviews</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">0</span>
+                                    <span class="stat-label">Saved Jobs</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-details">
+                        <div class="detail-section">
+                            <h4>About Me</h4>
+                            <p>{{ job_seeker.bio|default:"No bio provided." }}</p>
+                        </div>
+
+                        {% if job_seeker.skills %}
+                        <div class="detail-section">
+                            <h4>Skills</h4>
+                            <div class="skills-list">
+                                {% for skill in job_seeker.skills_list %}
+                                    <span class="skill-tag">{{ skill }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if job_seeker.experience %}
+                        <div class="detail-section">
+                            <h4>Work Experience</h4>
+                            <div class="experience-item">
+                                <p>{{ job_seeker.experience|linebreaks }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if job_seeker.education %}
+                        <div class="detail-section">
+                            <h4>Education</h4>
+                            <div class="education-item">
+                                <p>{{ job_seeker.education|linebreaks }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if job_seeker.resume %}
+                        <div class="detail-section">
+                            <h4>Resume</h4>
+                            <div class="resume-item">
+                                <a href="{{ job_seeker.resume.url }}" target="_blank" class="resume-link">
+                                    <i class="fas fa-file-pdf"></i> Download Resume
+                                </a>
+                                <span class="file-size">({{ job_seeker.resume.size|filesizeformat }})</span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="detail-section">
+                            <h4>Account Information</h4>
+                            <div class="account-info">
+                                <p><strong>Username:</strong> {{ user.username }}</p>
+                                <p><strong>Email:</strong> {{ user.email }}</p>
+                                <p><strong>Member since:</strong> {{ job_seeker.created_at|date:"F j, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search Jobs Section -->
+            <section id="search" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-search"></i> Search Jobs</h2>
+                </div>
+                <div class="search-content">
+                    <p>Job search functionality will be implemented here.</p>
+                </div>
+            </section>
+
+            <!-- Applications Section -->
+            <section id="applications" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-alt"></i> My Applications</h2>
+                </div>
+                <div class="applications-content">
+                    <p>Your job applications will appear here.</p>
+                </div>
+            </section>
+
+            <!-- Saved Jobs Section -->
+            <section id="saved" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-bookmark"></i> Saved Jobs</h2>
+                </div>
+                <div class="saved-content">
+                    <p>Your saved jobs will appear here.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-edit"></i> Edit Profile</h3>
+            <button class="close-modal" id="closeModalBtn">&times;</button>
+        </div>
+        <form id="editProfileForm" class="modal-body" method="post" action="{% url 'update_jobseeker_profile' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h4>Personal Information</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editFullName">Full Name *</label>
+                        <input type="text" id="editFullName" name="full_name" value="{{ job_seeker.full_name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmail">Email *</label>
+                        <input type="email" id="editEmail" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPhone">Phone Number *</label>
+                        <input type="tel" id="editPhone" name="phone" value="{{ job_seeker.phone }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLocation">Location</label>
+                        <input type="text" id="editLocation" name="location" value="{{ job_seeker.location }}" placeholder="e.g., New York, NY">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4>Professional Information</h4>
+                
+                <div class="form-group">
+                    <label for="editSkills">Skills</label>
+                    <textarea id="editSkills" name="skills" rows="3" placeholder="List your skills separated by commas (e.g., Python, Django, JavaScript, React)">{{ job_seeker.skills }}</textarea>
+                    <div class="form-text">Separate skills with commas</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editExperience">Work Experience</label>
+                    <textarea id="editExperience" name="experience" rows="4" placeholder="Describe your work experience, previous roles, responsibilities, and achievements">{{ job_seeker.experience }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editEducation">Education</label>
+                    <textarea id="editEducation" name="education" rows="3" placeholder="Your educational background, degrees, and certifications">{{ job_seeker.education }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editBio">Professional Bio</label>
+                    <textarea id="editBio" name="bio" rows="3" placeholder="Brief introduction about yourself, career goals, and what you're looking for">{{ job_seeker.bio }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4>Resume</h4>
+                <div class="form-group">
+                    <label for="editResume">Update Resume</label>
+                    <input type="file" id="editResume" name="resume" accept=".pdf,.doc,.docx">
+                    <div class="form-text">Supported formats: PDF, DOC, DOCX (Max 5MB)</div>
+                    {% if job_seeker.resume %}
+                    <div class="current-file mt-2">
+                        <small>Current resume: 
+                            <a href="{{ job_seeker.resume.url }}" target="_blank" class="text-primary">
+                                <i class="fas fa-file-pdf"></i> View Current Resume
+                            </a>
+                            ({{ job_seeker.resume.size|filesizeformat }})
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" id="cancelEditBtn">Cancel</button>
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Basic Styles */
+.dashboard-container {
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 0;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logout-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.dashboard-main {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    gap: 2rem;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-nav a {
+    display: block;
+    padding: 1rem;
+    color: #666;
+    text-decoration: none;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+}
+
+.sidebar-nav a.active {
+    background: #f0f4ff;
+    color: #667eea;
+    border-left-color: #667eea;
+}
+
+.sidebar-nav a:hover {
+    background: #f8f9fa;
+}
+
+/* Content Area */
+.content-area {
+    flex: 1;
+}
+
+.content-section {
+    display: none;
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.content-section.active {
+    display: block;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.edit-profile-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.edit-profile-btn:hover {
+    background: #5a6fd8;
+}
+
+/* Profile Content */
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.profile-avatar {
+    position: relative;
+    margin-right: 2rem;
+}
+
+.profile-avatar img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #f0f4ff;
+}
+
+.profile-status {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.status-badge {
+    background: #4CAF50;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.profile-info h3 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.profile-title {
+    color: #667eea;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.profile-location, .profile-phone {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.profile-details {
+    margin-top: 2rem;
+}
+
+.detail-section {
+    margin-bottom: 2rem;
+}
+
+.detail-section h4 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    border-bottom: 2px solid #f0f4ff;
+    padding-bottom: 0.5rem;
+}
+
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    background: #f0f4ff;
+    color: #667eea;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.experience-item, .education-item, .resume-item {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.resume-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.file-size {
+    color: #666;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+}
+
+.account-info p {
+    margin-bottom: 0.5rem;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eaeaea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-save {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .dashboard-main {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+    }
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    .profile-avatar {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+<script>
+// Simple JavaScript that will definitely work
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard loaded - testing navigation');
+    
+    // Navigation functionality
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+    const contentSections = document.querySelectorAll('.content-section');
+    
+    console.log('Found nav links:', navLinks.length);
+    console.log('Found content sections:', contentSections.length);
+    
+    // Function to show section
+    function showSection(sectionId) {
+        console.log('Attempting to show section:', sectionId);
+        
+        // Hide all sections
+        contentSections.forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Remove active from all nav links
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        // Show target section
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.classList.add('active');
+            console.log('Successfully showed section:', sectionId);
+        } else {
+            console.error('Section not found:', sectionId);
+        }
+        
+        // Activate clicked nav link
+        const activeLink = document.querySelector(`.sidebar-nav a[data-section="${sectionId}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    }
+    
+    // Add click events to nav links
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const sectionId = this.getAttribute('data-section');
+            console.log('Nav link clicked:', sectionId);
+            showSection(sectionId);
+        });
+    });
+    
+    // Modal functionality
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const editProfileModal = document.getElementById('editProfileModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    
+    console.log('Edit profile button:', editProfileBtn);
+    console.log('Modal:', editProfileModal);
+    
+    // Open modal
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', function() {
+            console.log('Edit profile clicked');
+            if (editProfileModal) {
+                editProfileModal.style.display = 'block';
+                console.log('Modal should be visible now');
+            }
+        });
+    }
+    
+    // Close modal function
+    function closeModal() {
+        console.log('Closing modal');
+        if (editProfileModal) {
+            editProfileModal.style.display = 'none';
+        }
+    }
+    
+    // Close modal events
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeModal);
+    }
+    
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', closeModal);
+    }
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === editProfileModal) {
+            closeModal();
+        }
+    });
+    
+    // Form submission
+    const editProfileForm = document.getElementById('editProfileForm');
+    if (editProfileForm) {
+        editProfileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submission intercepted');
+            
+            const formData = new FormData(this);
+            const saveBtn = this.querySelector('.btn-save');
+            const originalText = saveBtn.innerHTML;
+            
+            // Add loading state
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+            saveBtn.disabled = true;
+
+            // Submit to Django view
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server response:', data);
+                if (data.success) {
+                    alert('Profile updated successfully!');
+                    closeModal();
+                    // Reload to show updated data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    throw new Error(data.message || 'Error updating profile');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            })
+            .finally(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            });
+        });
+    }
+    
+    // Profile section is already visible due to 'active' class in HTML
+    // No need to call showSection() on load
+});
+
+// Test function
+function testJS() {
+    alert('JavaScript is working!');
+    console.log('JavaScript test successful');
+}
+</script>
+
+<!-- Test button -->
+<div style="position: fixed; bottom: 10px; right: 10px; z-index: 9999;">
+    <button onclick="testJS()" style="background: red; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">TEST JS</button>
+</div>
+{% endblock %}
