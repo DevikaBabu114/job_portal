@@ -406,11 +406,6 @@ def edit_company_profile(request):
         employer.company_description = request.POST.get('company_description', employer.company_description)
         employer.website = request.POST.get('website', employer.website)
         
-        # Handle logo upload
-        if 'company_logo' in request.FILES:
-            employer.company_logo = request.FILES['company_logo']
-        
-        employer.save()
         
         # Update user email if changed
         new_email = request.POST.get('email')
